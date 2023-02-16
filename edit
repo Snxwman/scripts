@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+
+edit() {
+    local EDITOR="$EDITOR"
+    local FILE=""
+
+    local SCRIPTS="$HOME/.scripts/"
+
+    local ARG="$1"
+    case "$ARG" in
+        -c ) EDITOR="code"; ARG="$2" ;;
+        -n ) EDITOR="nano"; ARG="$2" ;;
+        -s ) FILE=$(fd "$2" $SCRIPTS) 
+             [[ $FILE == "" ]] && FILE="$SCRIPTS/$2"  # Open a new buffer.
+             ARG=""  # Set ARG to empty string so it is ignored in the next case statement.
+             ;;
+        *  ) ;;
+    esac
+
+    case "$ARG" in
+        zrc       ) FILE="$ZDOTDIR/.zshrc" ;;
+        env       ) FILE="$ZDOTDIR/.zshenv" ;;
+        aliases   ) FILE="$XDG_CONFIG_HOME/.aliases/.aliases" ;;
+        vrc       ) FILE="$XDG_CONFIG_HOME/nvim/lua/custom/init.lua" ;;
+        qtile     ) FILE="$XDG_CONFIG_HOME/qtile/config.py" ;;
+        prompt    ) FILE="$XDG_CONFIG_HOME/.prompt" ;;
+        gitconfig ) FILE="$XDG_CONFIG_HOME/git/config" ;;
+        term      ) FILE="$XDG_CONFIG_HOME/alacritty.yml" ;;
+        nf        ) FILE="$XDG_CONFIG_HOME/.app/neofetch.conf" ;;
+        ssh       ) FILE="$HOME/.ssh/config" 
+    esac
+
+    [[ "$FILE" != "" ]] && $EDITOR $FILE || echo "No file specified"
+}
