@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Provides shortcuts to commonly used directories.
+# Built in flags for cd, as well as the builtin shorcuts of "" (~/) and - ($OLDPWD) still work.
+
+cd() {
+    # If a directory with the same name as a shortcut exists in the CWD, use it instead of the shortcut.
+    [[ -d "$1" ]] && builtin cd $@ && return;  
+
+    case "$1" in
+        cache   | ca ) builtin cd "$XDG_CACHE_HOME"      ;;
+        config  | c  ) builtin cd "$XDG_CONFIG_HOME"     ;;
+        docs    | d  ) builtin cd ~/documents            ;;
+        down    | dl ) builtin cd ~/downloads            ;;
+        github  | gh ) builtin cd ~/src/github           ;;
+        lbin    | lb ) builtin cd ~/.local/software/bin  ;;
+        lcache  | lc ) builtin cd ~/.local/cache         ;;
+        lgit    | lg ) builtin cd ~/.local/software/git  ;;
+        local   | l  ) builtin cd ~/.local               ;;
+        media   | m  ) builtin cd ~/media                ;;
+        music   | mu ) builtin cd ~/media/music          ;;
+        scripts | s  ) builtin cd ~/.scripts             ;;
+        trash   | t  ) builtin cd ~/.local/share/trash   ;;
+        youtube | yt ) builtin cd ~/media/videos/youtube ;;
+        * ) builtin cd $@ ;;  # Forward to builtin cd command.
+    esac
+}
