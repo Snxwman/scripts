@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Toggles the connection state of a bluetooth device using the devices MAC Address.
+# The device MUST already be paired and trusted.
+# The device's MAC Address can either be read from an environment variable or put in the function's local variable
+# You can find the MAC Address for your desired device by running `bluetoothctl paired-devices` and noting the relevant output.
+
+bt_toggle() {
+    # Place the device's MAC Address here if you are using this script as a keyboard shortcut.
+    # This is required because the script runs in its own environment when executed as a keyboard shortcut.
+    local DEVICE_MAC_ADDR="14:3F:A6:F5:08:C9"
+
+    [[ $(bluetoothctl info "$DEVICE_MAC_ADDR" | grep "Connected: no") ]] \
+        && bluetoothctl connect "$DEVICE_MAC_ADDR" \
+        || bluetoothctl disconnect "$DEVICE_MAC_ADDR"
+}
+
+bt_toggle
+
