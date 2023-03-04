@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+
+hash() {
+    local algo=$1
+    local data=$2
+    local salt=$3
+    local hashbin=""
+
+    case $algo in
+        --b2    ) hashbin="b2sum"     ;;
+        --ck    ) hashbin="ck"        ;;
+        --md5   ) hashbin="md5sum"    ;;
+        --sha1  ) hashbin="sha1sum"   ;;
+        --sha224) hashbin="sha224sum" ;;
+        --sha256) hashbin="sha256sum" ;;
+        --sha384) hashbin="sha384sum" ;;
+        --sha512) hashbin="sha512sum" ;;
+    esac
+
+    echo $data | $hashbin
+}
+
+hash $1 $2
