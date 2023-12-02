@@ -1,10 +1,18 @@
 #!/usr/bin/env zsh
 
+# TODO:
+#    - Break out the -s and -a options into their own case statement.
+#    - Implicitly try for scripts and alias files if no shortcut found?
+#    - Search system for any file and select with fzf?
+#    - Allow shortcut definitions with an external config file?
+#    - Add a usage string.
+
 edit() {
     local EDITOR="$EDITOR"
     local FILE=""
 
     local SCRIPTS="$HOME/.scripts/"
+    local ALIASES="$XDG_CONFIG_HOME/.aliases/"
 
     local ARG="$1"
     case "$ARG" in
@@ -14,6 +22,10 @@ edit() {
              [[ $FILE == "" ]] && FILE="$SCRIPTS/$2"  # Open a new buffer.
              ARG=""  # Set ARG to empty string so it is ignored in the next case statement.
              ;;
+        -a ) FILE=$(fd "$2" "$ALIASES.aliases")
+             [[ $FILE == "" ]] && FILE="$ALIASES/$2.aliases"
+             ARG=""
+            ;;
         *  ) ;;
     esac
 
@@ -27,8 +39,11 @@ edit() {
         gitconfig ) FILE="$XDG_CONFIG_HOME/git/config" ;;
         term      ) FILE="$XDG_CONFIG_HOME/alacritty.yml" ;;
         nf        ) FILE="$XDG_CONFIG_HOME/.app/neofetch.conf" ;;
-        ssh       ) FILE="$HOME/.ssh/config" 
+        xsession  ) FILE="$XDG_CONFIG_HOME/.xsession" ;;
+        picom     ) FILE="$XDG_CONFIG_HOME/picom.conf" ;;
+        hk        ) FILE="$XDG_CONFIG_HOME/.sxhkdrc" ;;
+        ssh       ) FILE="$HOME/.ssh/config" ;;
     esac
 
-    [[ "$FILE" != "" ]] && $EDITOR $FILE || echo "No file specified"
+    [[ "$FILE" != "" ]] && $EDITOR $FILE || echo "No such file."
 }
