@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+# Terminal color escape codes for linux and mac
 [[ `uname -s` == "Linux" ]] && E="\e" || E="\033"
 BOLD=$E"[1m"; ESC=$E"[0m";
 
@@ -13,11 +14,12 @@ allip() {
 }
 
 pubip() {
+    local ip_info_url="https://v4.ident.me/json"
     TITLE="$BOLD""Public IP Address:""$ESC"
 
     while IFS= read -r line; do
         ip_info+=("$line")
-    done < <(curl -s https://freegeoip.app/json/ | jq --raw-output '(.ip, .region_name, .country_name)')
+    done < <(curl -s "$ip_info_url" | jq --raw-output '(.ip, .city, .country)')
 
     ip_address="${ip_info[0]}"; region="${ip_info[1]}"; country="${ip_info[2]}"
 
