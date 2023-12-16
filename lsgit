@@ -10,7 +10,11 @@ lsgit() {
     [[ -f /usr/bin/fd ]] || { echo "fd is required"; return 1 }
 
     local loc="*.local/share/"
-    local dir="${1:-$HOME}"
+    
+    [[ -v LSGIT_DIR ]] \
+        && local dir="${1:-$LSGIT_DIR}" \
+        || local dir="${1:-$HOME}"
+
     [[ -d $dir ]] || { echo "directory $dir not found."; return 1 }
 
     fd --type directory --exclude $loc --hidden --glob ".git" $dir |\
