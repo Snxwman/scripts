@@ -9,14 +9,17 @@
 lsgit() {
     [[ -f /usr/bin/fd ]] || { echo "fd is required"; return 1 }
 
-    local loc="$HOME/.local/share/"
-    
     [[ -v LSGIT_DIR ]] \
         && local dir="${1:-$LSGIT_DIR}" \
         || local dir="${1:-$HOME}"
 
     [[ -d $dir ]] || { echo "directory $dir not found."; return 1 }
 
-    fd --type directory --exclude $loc --hidden --glob ".git" $dir |\
-        rev | cut -d. -f2- | rev    # Cut off ".git/" from fd returned path
+    fd  --prune --hidden \
+        --exclude "/{boot,dev,etc,proc,sys}" \
+        --exclude "/usr/{bin,lib,lib32}" \
+        --exclude "$HOME/.local/share" \
+        --type directory --glob ".git" $dir |\
+        rev | cut -d. -f2- | rev | sort    # Cut off ".git/" from fd returned path
 }
+
