@@ -10,7 +10,7 @@ cd() {
     case "$1" in
         cache   | ca ) builtin cd "$XDG_CACHE_HOME"      ;;
         config  | c  ) builtin cd "$XDG_CONFIG_HOME"     ;;
-        dots    | df ) builtin cd ~/dotfiles             ;;
+        dots    | df ) builtin cd ~/src/github/dotfiles  ;;
         docs    | d  ) builtin cd ~/documents            ;;
         down    | dl ) builtin cd ~/downloads            ;;
         github  | gh ) builtin cd ~/src/github           ;;
