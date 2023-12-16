@@ -9,7 +9,7 @@
 lsgit() {
     [[ -f /usr/bin/fd ]] || { echo "fd is required"; return 1 }
 
-    local loc="*.local/share/"
+    local loc="$HOME/.local/share/"
     
     [[ -v LSGIT_DIR ]] \
         && local dir="${1:-$LSGIT_DIR}" \
