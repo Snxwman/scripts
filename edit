@@ -1,4 +1,5 @@
-#!/usr/bin/env zsh
+#!/usr/bin/zsh
+# vim: set filetype=bash: 
 
 # TODO:
 #    - Break out the -s and -a options into their own case statement.
@@ -13,6 +14,7 @@ edit() {
 
     local SCRIPTS="$HOME/.scripts/"
     local ALIASES="$XDG_CONFIG_HOME/.aliases/"
+    local NVIM_PLUGINS="$XDG_CONFIG_HOME/nvim/lua/plugins/"
 
     local ARG="$1"
     case "$ARG" in
@@ -25,7 +27,10 @@ edit() {
         -a ) FILE=$(fd "$2" "$ALIASES.aliases")
              [[ $FILE == "" ]] && FILE="$ALIASES/$2.aliases"
              ARG=""
-            ;;
+             ;;
+        -p ) FILE=$(fd "$2" "$NVIM_PLUGINS")
+             ARG=""
+             ;; 
         *  ) ;;
     esac
 
@@ -38,7 +43,7 @@ edit() {
         prompt    ) FILE="$XDG_CONFIG_HOME/.prompt" ;;
         gitconfig ) FILE="$XDG_CONFIG_HOME/git/config" ;;
         term      ) FILE="$XDG_CONFIG_HOME/alacritty.yml" ;;
-        nf        ) FILE="$XDG_CONFIG_HOME/.app/neofetch.conf" ;;
+        nf        ) FILE="$XDG_CONFIG_HOME/neofetch/config.conf" ;;
         xsession  ) FILE="$XDG_CONFIG_HOME/.xsession" ;;
         picom     ) FILE="$XDG_CONFIG_HOME/picom.conf" ;;
         hk        ) FILE="$XDG_CONFIG_HOME/.sxhkdrc" ;;
