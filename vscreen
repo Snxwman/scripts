@@ -1,0 +1,8 @@
+#!/bin/bash
+
+case $1 in
+    start )
+            grep "vscreen" <<< $(xrandr --listmonitors) \
+                || xrandr --setmonitor vscreen 2560/154x1440/173+1280+1080 DP-0 ;;
+    kill ) xrandr --delmonitor vscreen ;;
+esac
