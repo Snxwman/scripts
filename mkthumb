@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+
+dir="~/media/photos/wallpaper/32:9/"
+
+# readarray -t files <<< "$(/usr/bin/ls ${dir}*.{jpg,jpeg,png})"
+readarray -t files <<< "$(ls ~/media/photos/wallpaper/32:9/*.{jpg,jpeg,png})"
+
+for file in "${files[@]}"; do
+    name="$(echo "$(basename "$file")" | rev | cut -d'.' -f2- | rev)"
+    echo "$(basename "$file") -> $(basename "$name.jpg.thumb")"
+    magick "$file" -monitor -quality 75 -resize 352x99 "$(dirname "$file")/.$name.jpg"
+    mv -v ".$name.jpg" "$name.jpg.thumb"
+    echo
+done
