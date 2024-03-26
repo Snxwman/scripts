@@ -16,16 +16,17 @@ lsgit() {
     [[ -d $dir ]] || { echo "directory $dir not found."; return 1 }
 
     git_dirs=(
-        $(fd --prune --hidden \
+        $(fd --prune --hidden --no-ignore \
         --exclude "/{boot,dev,etc,proc,sys}" \
         --exclude "/usr/{bin,lib,lib32}" \
-        --exclude "$HOME/.local/share" \
+        --exclude ".local/share" \
+        --exclude ".cache" \
+        --exclude "mnt" \
         --type directory --glob ".git" $dir | sort)
     )
 
-    for d in $git_dirs; do
+    for d in "${git_dirs[@]}"; do
         echo ${d%%.git/}
     done
-
 }
 
