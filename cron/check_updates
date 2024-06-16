@@ -1,0 +1,5 @@
+#!/bin/bash
+
+checkupdates > ~/.cache/pacman.updates 
+
+# date > ~/.cache/pacman.updates
