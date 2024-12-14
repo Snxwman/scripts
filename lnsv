@@ -1,0 +1,36 @@
+#!/usr/bin/zsh
+
+error() {
+    tput setaf 1
+    echo "lnsv: $1\033[0m" 1>&2
+    exit
+}
+
+lnsv() {
+    local _svdir="/etc/runit/sv"
+    local _runsvdir="/run/runit/service"
+
+    [[ "$#" -lt 1 ]] && error "Not enough arguments" 
+
+    case "$1" in
+        -u )  # Unlink a service
+            [[ -z "$2" ]] && error "No service name specified to remove"
+
+            local _sv="$_runsvdir/$2"
+            [[ -L "$_sv" ]] && sudo unlink "$_sv" || error "$2 is not a symlink in $_runsvdir"
+
+            echo "Unlinked: $_sv"
+            ;;
+
+        *  )  # Link a service
+            local _sv="$_svdir/$1"
+            [[ -d "$_sv" ]] \
+                && sudo ln --symbolic "$_sv" "$_runsvdir/" \
+                || error "No service dir for $1 in $_svdir"
+
+            tput setaf 6; echo "Linked: $_sv -> $_runsvdir/$1\033[0m"
+            ;;
+    esac
+}
+
+lnsv "$@"
