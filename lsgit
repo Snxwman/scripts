@@ -26,7 +26,8 @@ lsgit() {
     )
 
     for d in "${git_dirs[@]}"; do
-        echo ${d%%.git/}
+        echo "${d%%.git/}"
     done
 }
 
+lsgit
