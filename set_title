@@ -1,0 +1,26 @@
+#!/usr/bin/zsh
+_get_term() {
+    local term
+
+    case "$TERM" in
+        xterm-ghostty | ghostty | Ghostty ) term="Ghostty"  ;;
+        xterm-kitty | kitty | Kitty       ) term="Kitty"    ;;
+        * ) term="(?) terminal" ;;
+    esac
+
+    echo "$term"
+}
+
+set_title() {
+    # TODO: Support:
+    # - [x] local terminal
+    # - [ ] ssh
+    # - [ ] docker
+
+    local title="$(_get_term)"
+    local cmd="$2"
+    cmd=$(builtin echo $cmd | /usr/bin/cut -d' ' -f1)
+
+    [[ -n "$cmd" ]] && title+=" - $cmd"
+    builtin print -Pn "\033]2;${title}\007"
+}
