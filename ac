@@ -1,0 +1,21 @@
+#!/bin/bash
+
+outlet_ip="10.0.0.187"
+outlet_name="A/C"
+
+case "$1" in
+    "on"     ) mode="on"  ;;
+    "off"    ) mode="off" ;;
+    "toggle" ) 
+        status="$(\
+            kasa --type strip --host 10.0.0.187 --json |\
+            jq --arg outlet_name ${outlet_name} '.system.get_sysinfo.children[] | select(.alias | contains($outlet_name)) | .state'
+        )"
+        case "$status" in
+            0 ) mode="on"  ;;
+            1 ) mode="off" ;;
+        esac
+        ;;
+esac
+
+kasa --type strip --host "$outlet_ip" "$mode" --name "$outlet_name" 
