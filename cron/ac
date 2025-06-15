@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+source "$HOME/.scripts/cron/.logfmt"
+
+# MAX_TEMP and MIN_TEMP are in tenths of a degree.
+MAX_TEMP=710
+MIN_TEMP=700
+
+# Smart device info
+outlet_name="A/C"
+outlet_ip="10.100.20.28"
+govee_shelf_mac="A4:C1:38:17:FA:D3"
+govee_desk_mac="A4:C1:38:B1:32:83"
+govee_dresser_mac="A4:C1:38:61:89:3C"
+
+get_outlet_status() {
+    local status="$(\
+        kasa \
+            --json \
+            --type strip \
+            --host $outlet_ip 
+    )"
+
+    jq --arg name ${outlet_name} '
+        .system
+        .get_sysinfo
+        .children[] 
+        | select(.alias == $name) 
+        .state' <<< $status
+}
+
+set_outlet_state() {
+    local mode="$1"
+    echo "Turning $outlet_name $mode"
+
+    kasa \
+        --type strip \
+        --host "$outlet_ip" \
+        "$mode" \
+        --name "$outlet_name" 
+}
+
+get_temp() {
+    local mac="$1"
+    local status="$(\
+        govee \
+            --json \
+            --status \
+            --address "$mac"
+    )"
+    
+    jq '.temperatureF' <<< $status
+}
+
+_auto() {
+    local tmp1=$(mktemp); local tmp2=$(mktemp)
+    get_outlet_status > "$tmp1" &
+    get_temp $govee_shelf_mac > "$tmp2"
+    wait
+
+    outlet_status="$(<"$tmp1")"
+    temp_shelf="$(<"$tmp2")"
+
+    # 'Convert' to tenths of a degree b/c [[ only handles integers
+    shelf_temp="$(echo $temp_shelf | tr -d '.')"
+    
+    [[ "$shelf_temp" = "" ]] && { 
+        logfmt W ac issue="failed_to_get_temp"
+        exit 1
+    }
+
+    if [[ "$shelf_temp" -gt "$MAX_TEMP" ]] then
+        if [[ $outlet_status -ne 1 ]]; then
+            set_outlet_state "on"
+            logfmt S ac temp[shelf]=$temp_shelf status[ac]=$outlet_status change="on"
+            exit 0
+        fi
+    fi
+
+    if [[ "$shelf_temp" -lt "$MIN_TEMP" ]]; then
+        if [[ "$outlet_status" -ne 0 ]]; then
+            set_outlet_state "off"
+            logfmt S ac temp[shelf]=$temp_shelf status[ac]=$outlet_status change="off"
+            exit 0
+        fi
+    fi
+
+    logfmt I ac temp[shelf]=$temp_shelf status[ac]=$outlet_status change="none"
+}
+
+case "$1" in
+    "auto"   ) _auto ;;
+    "on"     ) set_outlet_state "on"  ;;
+    "off"    ) set_outlet_state "off" ;;
+    "toggle" ) 
+        case "$(get_outlet_status)" in
+            0 ) set_outlet_state "on"  ;;
+            1 ) set_outlet_state "off" ;;
+            * ) exit 1  # error occured, couldnt find $outlet_name
+        esac
+        ;;
+esac
