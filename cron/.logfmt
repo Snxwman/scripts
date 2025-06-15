@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+logfmt() {
+    local CRON_LOG_FILE="$HOME/.local/share/cron/cron.log"
+    local DATE="\033[38;5;67m"
+    local TIME="\033[38;5;75m"
+    local TZ="\033[38;5;238m"
+    local SRC="\033[38;5;186m"
+    local KEY="\033[38;5;245m"
+    local SEP="\033[38;5;238m"
+    local VAL="\033[38;5;7m"
+    local INFO="\033[38;5;255m"
+    local SUCC="\033[38;5;46m"
+    local WARN="\033[38;5;226m"
+    local ERR="\033[38;5;124m"
+    local ERRTXT="\033[38;5;196m"
+    local R="\033[0m"
+    local LVL=""
+
+    local level="$1"; shift
+    local name="$1"; shift
+    local logline=""
+
+    case "$level" in
+        "I" | "info"    ) LVL="${INFO}" ;;
+        "S" | "sucess"  ) LVL="${SUCC}" ;;
+        "W" | "warning" )
+            LVL="${WARN}"; VAL="${WARN}"
+            logline+="${KEY}severity${SEP}=${VAL}warning${R} "
+            ;;
+        "E" | "error"   )
+            LVL="${ERR}"; VAL="${ERRTXT}"
+            logline+="${KEY}severity${SEP}=${VAL}error${R} "
+            ;;
+    esac
+
+    for data in "$@"; do
+        str="$(
+            echo "$data" \
+            | tr ' ' '_' \
+            | tr '[:upper:]' '[:lower:]'\
+            | tr -d '"' \
+            | tr -d "'"
+        )"
+
+        key="$(cut -d '=' -f1 <<< "$str")"
+        val="$(cut -d '=' -f2 <<< "$str")"
+
+        logline+="${KEY}${key}${SEP}=${VAL}${val}${R} "
+    done
+
+    local bar="${LVL}⏽${R}"
+    local timestamp="${KEY}timestamp${SEP}="
+    timestamp+="${DATE}$(date +'%Y-%m-%d')${SEP}T"
+    timestamp+="${TIME}$(date +'%H:%M:%S')${TZ}$(date +'%:z')${R}"
+    local script="${KEY}script${SEP}=${SRC}${name}${R}"
+    local fingerprint="$bar $timestamp $script"
+
+    echo -e "$fingerprint $logline" | tee --append "$CRON_LOG_FILE"
+}
