@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+source "$HOME/.scripts/cron/.logfmt"
+source "$HOME/.scripts/cron/.secrets.env"
+
+DATA_DIR="$XDG_DATA_HOME/data/weather"
+DATE="$(date --iso-8601)"
+
+declare -A apikeys=(
+    [openweather]="$OPENWEATHER_APIKEY"
+    [tomorrow.io]="$TOMORROW_APIKEY"
+)
+declare -A base_urls=(
+    [openweather]="https://api.openweathermap.org/data/3.0/onecall"
+    [tomorrow.io]="https://api.tomorrow.io/v4/weather"
+)
+
+file_loc="$(tr ' ' '-' <<< "$WTR_LOCATION")"
+url_loc="$(sed 's/ /%20/' <<< "$WTR_LOCATION")"
+units="imperial"
+params="location=$url_loc&units=$units&apikey=${apikeys[tomorrow.io]}"
+
+data=""
+status=""
+type=""
+endpoint=""
+provider="tomorrow.io"
+
+_get_realtime() {
+    local res="$(
+        curl \
+        --request GET \
+        --url "${base_urls[tomorrow.io]}/realtime?${params}" \
+        --compressed \
+        --header 'accept: application/json' \
+        --header 'accept-encoding: deflate, gzip, br' \
+        --write-out "%{http_code}" \
+        --silent
+    )"
+
+    status="${res: -3}"; data="${res::-3}"
+    type="realtime"; endpoint="/realtime"
+    _write_data_and_log_job
+}
+
+_get_forecast() {
+    local res="$(\
+        curl \
+        --request GET \
+        --url "${base_urls[tomorrow.io]}/forecast?${params}" \
+        --compressed \
+        --header 'accept: application/json' \
+        --header 'accept-encoding: deflate, gzip, br' \
+        --write-out "%{http_code}" \
+        --silent
+    )"
+
+    type="forecast"; endpoint="/forecast"
+    status="${res: -3}"; data="${res::-3}"
+    _write_data_and_log_job
+}
+
+_write_data_and_log_job() {
+    if [[ "$status" -lt 300 ]]; then
+        echo "$data" >> "${DATA_DIR}/${DATE}_${file_loc}_${provider}_${type}.jsonl"
+        logfmt S wtr provider=$provider endpoint=$endpoint http=$status location=$file_loc
+        exit 0
+    else
+        code="$(jq '.code' <<< "$data")"
+        type="$(jq '.type' <<< "$data")"
+        logfmt E wtr provider=$provider endpoint=$endpoint http=$status "code=$code" "type=$type"
+    fi
+}
+
+_log() {
+    case $1 in
+        "realtime" ) _get_realtime ;;
+        "forecast" ) _get_forecast ;;
+    esac
+}
+
+cmd=$1; shift
+case "$cmd" in
+    "log" ) _log "$@" ;;
+esac
