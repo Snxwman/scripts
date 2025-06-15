@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+PACMAN_UPDATES_FILE="$XDG_CACHE_HOME/pacman.updates"
+
 _check_pacman() {
-checkupdates > ~/.cache/pacman.updates 
+    date > "$PACMAN_UPDATES_FILE"
+    checkupdates > "$PACMAN_UPDATES_FILE"
 }
 
 _check_python() {
@@ -17,5 +20,3 @@ case "$1" in
     "python" ) ;;
     "rust"   ) ;;
 esac
-
-# date > ~/.cache/pacman.updates

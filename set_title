@@ -14,11 +14,6 @@ _get_term() {
 }
 
 set_title() {
-    # TODO: Support:
-    # - [x] local terminal
-    # - [ ] ssh
-    # - [ ] docker
-
     local title="$(_get_term)"
     local cmd="$2"
     cmd=$(builtin echo $cmd | /usr/bin/cut -d' ' -f1)

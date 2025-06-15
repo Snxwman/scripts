@@ -14,7 +14,7 @@ cd() {
         docs    | d  ) builtin cd ~/documents            ;;
         down    | dl ) builtin cd ~/downloads            ;;
         github  | gh ) builtin cd ~/src/github           ;;
-        lbin    | lb ) builtin cd ~/.local/software/bin  ;;
+        lbin    | lb ) builtin cd ~/.local/bin           ;;
         lcache  | lc ) builtin cd ~/.local/cache         ;;
         lgit    | lg ) builtin cd ~/.local/software/git  ;;
         local   | l  ) builtin cd ~/.local               ;;
