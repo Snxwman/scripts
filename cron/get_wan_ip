@@ -1,3 +1,0 @@
-#!/bin/bash
-
-curl v4.ident.me > /tmp/ipv4

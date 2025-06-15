@@ -1,4 +1,6 @@
-#!/usr/bin/zsh
+#!/usr/bin/env zsh
+# vim: set filetype=bash: 
+
 _get_term() {
     local term
 
@@ -21,6 +23,8 @@ set_title() {
     local cmd="$2"
     cmd=$(builtin echo $cmd | /usr/bin/cut -d' ' -f1)
 
+    [[ -v SCRATCHPAD ]] && title="(scratchpad) $title"
     [[ -n "$cmd" ]] && title+=" - $cmd"
+
     builtin print -Pn "\033]2;${title}\007"
 }

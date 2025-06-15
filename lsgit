@@ -1,4 +1,5 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
+# vim: set filetype=bash: 
 
 # Find all git directories under a specified directory or $HOME, by default.
 # Uses fd to search for any directory that contains a .git folder.

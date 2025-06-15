@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # Terminal color escape codes for linux and mac
 [[ `uname -s` == "Linux" ]] && E="\e" || E="\033"

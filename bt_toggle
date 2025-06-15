@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # Toggles the connection state of a bluetooth device using the devices MAC Address.
 # The device MUST already be paired and trusted.

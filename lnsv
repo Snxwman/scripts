@@ -1,4 +1,5 @@
-#!/usr/bin/zsh
+#!/usr/bin/env zsh
+# vim: set filetype=bash: 
 
 error() {
     tput setaf 1

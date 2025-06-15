@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# vim: set filetype=bash: 
 
 hash() {
     local algo=$1

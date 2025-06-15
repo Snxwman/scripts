@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+_check_pacman() {
+checkupdates > ~/.cache/pacman.updates 
+}
+
+_check_python() {
+    :
+}
+
+_check_rust() {
+    :
+}
+
+case "$1" in
+    "pacman" ) ;;
+    "python" ) ;;
+    "rust"   ) ;;
+esac
+
+# date > ~/.cache/pacman.updates
