@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+CRON_LOG_FILE="$XDG_DATA_HOME/cron/cron.log"
+QTILE_LOG_FILE="$XDG_DATA_HOME/qtile/qtile.log"
+
+_usage() {
+    echo "catlog [options] <file> [context]"
+    echo
+    echo "Options:"
+    echo "    -f, --follow, f, follow       Run 'tail -f' on the log file instead of 'cat'."
+    echo
+    echo "Context:"
+    echo "When --follow is specified"
+    echo "    [N]       The number of lines back from the end of the file to start printing from."
+    echo "                  Use 0 to start from the beginning of the file."
+    echo
+    echo "<file> may be a path or a 'known log file'"
+    echo "Known log files:"
+    echo "    cron      $XDG_DATA_HOME/cron/cron.log"
+    echo "    qtile     $XDG_DATA_HOME/qtile/qtile.log"
+    exit 0
+}
+
+catlog() {
+    local follow=0
+    local cmd=""
+    local log=""
+    local lines=""
+
+    case "$1" in
+        "-h" | "--help" | "h" | "help" ) _usage
+    esac
+
+    case "$1" in
+        "-f" | "f" | "follow" )
+            shift; follow=1
+            cmd+="tail -f "
+            ;;
+        *  ) cmd+="bat " ;;
+
+    esac
+
+    case "$1" in
+        "cron" )
+            shift
+            [[ $follow -eq 0 ]] && cmd+="--color never "
+            lines="${1:-50}"
+            log="$CRON_LOG_FILE"
+            ;;
+        "qtile" )
+            shift
+            lines="${1:-100}"
+            log="$QTILE_LOG_FILE"
+            ;;
+        * ) log="$1" ;;
+    esac
+
+    [[ $follow -eq 1 ]] && cmd+="--lines=$lines"
+
+    eval "$cmd" "$log"
+}
+
+catlog "$@"
