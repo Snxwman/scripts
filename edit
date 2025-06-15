@@ -1,12 +1,5 @@
-#!/usr/bin/zsh
+#!/usr/bin/env zsh
 # vim: set filetype=bash: 
-
-# TODO:
-#    - Break out the -s and -a options into their own case statement.
-#    - Implicitly try for scripts and alias files if no shortcut found?
-#    - Search system for any file and select with fzf?
-#    - Allow shortcut definitions with an external config file?
-#    - Add a usage string.
 
 edit() {
     local EDITOR="$EDITOR"
@@ -18,16 +11,23 @@ edit() {
 
     local ARG="$1"
     case "$ARG" in
+        # Open in a specific editor
         -c ) EDITOR="code"; ARG="$2" ;;
         -n ) EDITOR="nano"; ARG="$2" ;;
-        -s ) FILE=$(fd "$2" $SCRIPTS) 
+
+        # Open a specific script
+        -s ) FILE=$(fd "^$2$" $SCRIPTS) 
              [[ $FILE == "" ]] && FILE="$SCRIPTS/$2"  # Open a new buffer.
              ARG=""  # Set ARG to empty string so it is ignored in the next case statement.
              ;;
+
+        # Open a specific alias file
         -a ) FILE=$(fd "$2" "$ALIASES.aliases")
              [[ $FILE == "" ]] && FILE="$ALIASES/$2.aliases"
              ARG=""
              ;;
+
+        # Open a specific nvim plugin
         -p ) FILE=$(fd "$2" "$NVIM_PLUGINS")
              ARG=""
              ;; 
@@ -35,20 +35,25 @@ edit() {
     esac
 
     case "$ARG" in
-        zrc       ) FILE="$ZDOTDIR/.zshrc" ;;
-        env       ) FILE="$ZDOTDIR/.zshenv" ;;
-        aliases   ) FILE="$XDG_CONFIG_HOME/.aliases/.aliases" ;;
-        vrc       ) FILE="$XDG_CONFIG_HOME/nvim/lua/custom/init.lua" ;;
-        qtile     ) FILE="$XDG_CONFIG_HOME/qtile/config.py" ;;
-        prompt    ) FILE="$XDG_CONFIG_HOME/.prompt" ;;
-        gitconfig ) FILE="$XDG_CONFIG_HOME/git/config" ;;
-        term      ) FILE="$XDG_CONFIG_HOME/alacritty.yml" ;;
-        nf        ) FILE="$XDG_CONFIG_HOME/neofetch/config.conf" ;;
-        xsession  ) FILE="$XDG_CONFIG_HOME/.xsession" ;;
-        picom     ) FILE="$XDG_CONFIG_HOME/picom.conf" ;;
-        hk        ) FILE="$XDG_CONFIG_HOME/.sxhkdrc" ;;
-        ssh       ) FILE="$HOME/.ssh/config" ;;
+        z | sh | zrc        ) FILE="$ZDOTDIR/.zshrc"                    ;;
+        e | env             ) FILE="$ZDOTDIR/.zshenv"                   ;;
+        a | aliases         ) FILE="$XDG_CONFIG_HOME/.aliases/.aliases" ;;
+        g | term | ghostty  ) FILE="$XDG_CONFIG_HOME/ghostty"           ;;
+        q | wm | qtile      ) FILE="$XDG_CONFIG_HOME/qtile/"            ;;
+        n | nvim            ) FILE="$XDG_CONFIG_HOME/nvim/"             ;;  
+        s | scripts         ) FILE="$HOME/.scripts/"                    ;;  
+        o | obsidian        ) FILE="$HOME/documents/obsidian/Personal/.obsidian/snippets/" ;;  
+        df | dotfiles       ) FILE="$HOME/src/github/dotfiles/"         ;;
+        ssh         ) FILE="$HOME/.ssh/config"                      ;;
+        prompt      ) FILE="$XDG_CONFIG_HOME/.prompt"               ;;
+        gitconfig   ) FILE="$XDG_CONFIG_HOME/git/config"            ;;
+        nf          ) FILE="$XDG_CONFIG_HOME/neofetch/config.conf"  ;;
+        xsession    ) FILE="$XDG_CONFIG_HOME/.xsession"             ;;
+        picom       ) FILE="$XDG_CONFIG_HOME/picom.conf"            ;;
+        hk          ) FILE="$XDG_CONFIG_HOME/.sxhkdrc"              ;;
     esac
 
-    [[ "$FILE" != "" ]] && $EDITOR $FILE || echo "No such file."
+    [[ "$FILE" != "" ]] \
+        && { pushd $(dirname $FILE) && $EDITOR $FILE && popd ; } \
+        || { echo "No such file." ; }
 }
