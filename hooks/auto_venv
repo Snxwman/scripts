@@ -1,0 +1,60 @@
+#!/usr/bin/env zsh
+# vim: set filetype=bash:
+
+# zsh hook: chpwd
+
+# Zsh hook to automatically source a Python virtual environment when the
+# $PWD has a .venv directory and deactivate the virtual environment when the CWD
+# no longer has a .venv directory.
+#
+# Install:
+#   1. Ensure the path to this function is in your fpath
+#   2. Autoload this function in your .zshrc
+#   3. Add this function to your chpwd hooks array
+#   4. Restart your shell
+#
+# Example Install:
+#
+#   fpath=( "~/.scripts/" $fpath )
+#   autoload auto_venv
+#   chpwd_functions=( auto_venv )
+#
+# Notes:
+#   - When using as a chpwd hook, aliases such as
+#         alias ..="cd .."
+#     will not work because zsh does not call hooks on alias expansions.
+#     You must use a function instead, such as
+#         ..(){ cd .. }
+#   - The chpwd hook is not called in subshells.
+
+auto_venv() {
+    # readonly BOUNDARY="$HOME/src/github/"
+    local VENV_ROOT=""
+    local DIR="$PWD"
+
+    # Early exit if outside of boundary
+    # [[ "$PWD" != "$BOUNDARY"* ]] && return
+
+    # Early exit if direnv file found
+    [[ -f "$P" ]] && return
+
+    # Early exit if $PWD is a subdir of the active venv
+    if [[ -n "$VIRTUAL_ENV" ]]; then 
+        local CURR_VENV="$(dirname "$VIRTUAL_ENV")"
+        [[ "$PWD" == "$CURR_VENV"* ]] && return
+    fi
+
+    # Search for a .venv dir up from $PWD
+    while [[ "$DIR" != "/" ]]; do
+        [[ -d "$DIR/.venv" ]] && { VENV_ROOT="$DIR"; break; }
+        [[ -d "$DIR/.git" ]] && break
+        DIR="$(dirname "$DIR")"
+    done
+
+    [[ -n "$VIRTUAL_ENV" ]] && deactivate
+
+    if [[ -n "$VENV_ROOT" ]]; then
+        local VENV="$VENV_ROOT/.venv/bin/activate"
+        [[ -f "$VENV" ]] && source "$VENV"
+    fi
+}
